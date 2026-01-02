@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
-	"university/internal/storage/postgres"
+	"university/internal/storage"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
@@ -45,5 +45,5 @@ func main() {
 	}
 	defer db.Close(context.Background())
 
-	repo := postgres.NewRepository(db)
+	repo := storage.NewRepository(db)
 }
