@@ -16,6 +16,7 @@ func NewRepository(db *pgx.Conn) *Repository {
 }
 
 func (r *Repository) getStudentByID(id string) (*model.StudentResponse, error) {
+	var err error
 
 	query := `
 	SELECT s.id, s.first_name, s.last_name, s.gender, s.birth_date, g.name
@@ -26,7 +27,7 @@ func (r *Repository) getStudentByID(id string) (*model.StudentResponse, error) {
 
 	var student model.StudentResponse
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		context.Background(),
 		query,
 		id,
@@ -44,4 +45,40 @@ func (r *Repository) getStudentByID(id string) (*model.StudentResponse, error) {
 	}
 
 	return &student, nil
+}
+
+func (r *Repository) getAllSchedules() ([]model.ScheduleResponse, error) {
+	var err error
+
+	query := `
+	SELECT sc.id, f.name, g.name, sc.subject, sc.class_time
+	FROM schedule sc
+	JOIN faculties f ON sc.faculty_id = f.id
+	JOIN groups g ON sc.group_id = g.id
+	`
+
+	rows, err := r.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []model.ScheduleResponse
+
+	for rows.Next() {
+		var schedule model.ScheduleResponse
+		err := rows.Scan(
+			&schedule.ID,
+			&schedule.Faculty,
+			&schedule.Group,
+			&schedule.Subject,
+			&schedule.ClassTime,
+		)
+		if err != nil {
+			return nil, err
+		}
+		schedules = append(schedules, schedule)
+	}
+
+	return schedules, nil
 }
