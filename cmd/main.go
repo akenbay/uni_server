@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"university/internal/storage"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
@@ -38,10 +39,11 @@ func main() {
 	}
 
 	db_url := os.Getenv("DATABASE_URL")
-	conn, err := pgx.Connect(context.Background(), db_url)
+	db, err := pgx.Connect(context.Background(), db_url)
 	if err != nil {
 		logger.Fatal("Error connecting to database: ", err)
 	}
-	defer conn.Close(context.Background())
+	defer db.Close(context.Background())
 
+	repo := storage.NewRepository(db)
 }
