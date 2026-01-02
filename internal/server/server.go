@@ -1,9 +1,23 @@
 package server
 
+import (
+	"github.com/labstack/echo/v4"
+
+	"university/internal/handler"
+)
+
 type Server struct {
+	handler *handler.Handler
 }
 
-func NewServer() (*Server, error) {
+func NewServer(handler *handler.Handler) *Server {
+	return &Server{handler: handler}
+}
 
-	return &Server{}, nil
+func (s *Server) Start(addr string) error {
+	e := echo.New()
+
+	s.handler.Register(e)
+
+	return e.Start(addr)
 }

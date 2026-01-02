@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 	"time"
+	"university/internal/handler"
+	"university/internal/server"
+	"university/internal/service"
 	"university/internal/storage"
 
 	"github.com/jackc/pgx/v5"
@@ -46,4 +49,12 @@ func main() {
 	defer db.Close(context.Background())
 
 	repo := storage.NewRepository(db)
+	svc := service.NewService(repo)
+	hnd := handler.NewHandler(srv)
+	srv := server.NewServer(hnd)
+
+	err = server.Start(":8080")
+	if err != nil {
+		logger.Fatal("server error: ", err)
+	}
 }
