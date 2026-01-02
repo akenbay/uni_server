@@ -82,3 +82,37 @@ func (r *Repository) getAllSchedules() ([]model.ScheduleResponse, error) {
 
 	return schedules, nil
 }
+
+func (r *Repository) getGroupSchedule(groupID string) ([]model.ScheduleResponse, error) {
+	query := `
+	SELECT sc.id, f.name, g.name, sc.subject, sc.class_time
+	FROM schedule sc
+	JOIN faculties f ON sc.faculty_id = f.id
+	JOIN groups g ON sc.group_id = g.id
+	WHERE sc.group_id = $1
+	`
+
+	rows, err := r.db.Query(context.Background(), query, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []model.ScheduleResponse
+	for rows.Next() {
+		var schedule model.ScheduleResponse
+		err := rows.Scan(
+			&schedule.ID,
+			&schedule.Faculty,
+			&schedule.Group,
+			&schedule.Subject,
+			&schedule.ClassTime,
+		)
+		if err != nil {
+			return nil, err
+		}
+		schedules = append(schedules, schedule)
+	}
+
+	return schedules, nil
+}
