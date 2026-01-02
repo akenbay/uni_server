@@ -50,10 +50,10 @@ func main() {
 
 	repo := storage.NewRepository(db)
 	svc := service.NewService(repo)
-	hnd := handler.NewHandler(srv)
+	hnd := handler.NewHandler(svc)
 	srv := server.NewServer(hnd)
 
-	err = server.Start(":8080")
+	err = srv.Start(":8080")
 	if err != nil {
 		logger.Fatal("server error: ", err)
 	}
