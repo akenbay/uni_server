@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 
+	"university/internal/model"
 	"university/internal/service"
 )
 
@@ -61,4 +62,18 @@ func (h *Handler) GetGroupSchedule(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, schedules)
+}
+
+func (h *Handler) CreateAttendanceRecord(c echo.Context) error {
+	var record model.AttendanceRecord
+	if err := c.Bind(&record); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	err := h.service.CreateAttendanceRecord(&record)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "attendance record created successfully"})
 }
