@@ -51,10 +51,11 @@ func (r *Repository) GetAllSchedules() ([]model.ScheduleResponse, error) {
 	var err error
 
 	query := `
-	SELECT sc.id, f.name, g.name, sc.subject, sc.class_time
+	SELECT sc.id, f.name, g.name, s.name, sc.class_time
 	FROM schedule sc
 	JOIN faculties f ON sc.faculty_id = f.id
 	JOIN groups g ON sc.group_id = g.id
+	JOIN subjects s ON sc.subject_id = s.id
 	`
 
 	rows, err := r.db.Query(context.Background(), query)
@@ -85,10 +86,11 @@ func (r *Repository) GetAllSchedules() ([]model.ScheduleResponse, error) {
 
 func (r *Repository) GetGroupSchedule(groupID string) ([]model.ScheduleResponse, error) {
 	query := `
-	SELECT sc.id, f.name, g.name, sc.subject, sc.class_time
+	SELECT sc.id, f.name, g.name, s.name, sc.class_time
 	FROM schedule sc
 	JOIN faculties f ON sc.faculty_id = f.id
 	JOIN groups g ON sc.group_id = g.id
+	JOIN subjects s ON sc.subject_id = s.id
 	WHERE sc.group_id = $1
 	`
 
@@ -115,4 +117,22 @@ func (r *Repository) GetGroupSchedule(groupID string) ([]model.ScheduleResponse,
 	}
 
 	return schedules, nil
+}
+
+func (r *Repository) CreateAttendanceRecord(record *model.AttendanceRecord) error {
+	query := `
+	INSERT INTO attendance (student_id, subject_id, visit_day, visited)
+	VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := r.db.Exec(
+		context.Background(),
+		query,
+		record.StudentID,
+		record.SubjectID,
+		record.VisitDay,
+		record.Visited,
+	)
+
+	return err
 }
