@@ -24,3 +24,15 @@ func (s *Service) GetAllSchedules() ([]model.ScheduleResponse, error) {
 func (s *Service) GetGroupSchedule(groupID string) ([]model.ScheduleResponse, error) {
 	return s.repo.GetGroupSchedule(groupID)
 }
+
+func (s *Service) CreateAttendanceRecord(record *model.AttendanceRecord) error {
+	return s.repo.CreateAttendanceRecord(record)
+}
+
+func (s *Service) GetAttendanceRecordsByStudentID(studentID int) ([]model.AttendanceRecord, error) {
+	return s.repo.GetAttendanceRecordsByStudentID(studentID)
+}
+
+func (s *Service) GetAttendanceRecordsBySubjectID(subjectID int) ([]model.AttendanceRecord, error) {
+	return s.repo.GetAttendanceRecordsBySubjectID(subjectID)
+}
