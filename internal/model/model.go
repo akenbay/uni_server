@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type StudentResponse struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
@@ -32,11 +34,11 @@ type AttendanceRecord struct {
 
 // User represents a user account
 type User struct {
-	ID           int    `json:"id"`
-	Email        string `json:"email"`
-	PasswordHash string `json:"-"`
-	IsActive     bool   `json:"is_active"`
-	CreatedAt    string `json:"created_at"`
+	ID           int       `json:"id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"-"`
+	IsActive     bool      `json:"is_active"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 // AuthRequest is the payload for both registration and login
@@ -53,9 +55,9 @@ type LoginResponse struct {
 
 // UserResponse is the user info returned in /api/users/me
 type UserResponse struct {
-	ID        int      `json:"id"`
-	Email     string   `json:"email"`
-	IsActive  bool     `json:"is_active"`
-	CreatedAt string   `json:"created_at"`
-	Roles     []string `json:"roles"`
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	Roles     []string  `json:"roles"`
 }
