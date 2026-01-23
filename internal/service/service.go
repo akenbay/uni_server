@@ -43,6 +43,10 @@ func (s *Service) GetStudentsGPA() ([]model.StudentGPAResponse, error) {
 	return s.repo.GetStudentsGPA()
 }
 
+func (s *Service) GetSubjectStats() ([]model.SubjectStatsResponse, error) {
+	return s.repo.GetSubjectStats()
+}
+
 func (s *Service) GetAllSchedules() ([]model.ScheduleResponse, error) {
 	return s.repo.GetAllSchedules()
 }
