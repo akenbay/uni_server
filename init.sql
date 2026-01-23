@@ -149,3 +149,16 @@ INSERT INTO attendance (student_id, subject_id, visit_day, visited) VALUES
 (3, 2, '2026-01-07', true),
 (4, 2, '2026-01-07', true),
 (5, 5, '2026-01-09', true);
+
+-- Sample grades for testing GPA and subject stats
+INSERT INTO grades (student_id, subject_id, grade) VALUES
+    -- values scaled to a 4.0 scale (originally assumed out of 5)
+    (1, 3, 3.60), -- Anna: Mathematics (4.50 -> 3.60)
+    (1, 5, 3.20), -- Anna: Databases  (4.00 -> 3.20)
+    (2, 1, 3.00), -- Maria: Physical Education (3.75 -> 3.00)
+    (2, 4, 3.40), -- Maria: Physics (4.25 -> 3.40)
+    (3, 2, 3.12), -- Alex: Philosophy (3.90 -> 3.12)
+    (3, 3, 3.28), -- Alex: Mathematics (4.10 -> 3.28)
+    (4, 2, 3.84), -- Elena: Philosophy (4.80 -> 3.84)
+    (5, 5, 2.88), -- Ivan: Databases (3.60 -> 2.88)
+    (5, 3, 2.72); -- Ivan: Mathematics (3.40 -> 2.72)
