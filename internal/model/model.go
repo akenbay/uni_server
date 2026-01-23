@@ -24,6 +24,12 @@ type StudentGPAResponse struct {
 	GPA float64 `json:"gpa"`
 }
 
+type SubjectStatsResponse struct {
+	Name             string  `json:"name"`
+	GradedStudents   int     `json:"graded_students"`
+	AverageGrade     float64 `json:"avg_grade"`
+}
+
 type Subject struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
