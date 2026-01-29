@@ -69,6 +69,16 @@ func (s *Service) GetAttendanceRecordsBySubjectID(subjectID string) ([]model.Att
 
 // Register creates a new user account
 func (s *Service) Register(req *model.AuthRequest) (*model.User, error) {
+	// Validate email is not empty
+	if req.Email == "" {
+		return nil, errors.New("email is required")
+	}
+
+	// Validate password is not empty
+	if req.Password == "" {
+		return nil, errors.New("password is required")
+	}
+
 	// Validate email format
 	if !isValidEmail(req.Email) {
 		return nil, errors.New("invalid email format")
@@ -105,6 +115,16 @@ func (s *Service) Register(req *model.AuthRequest) (*model.User, error) {
 
 // Login authenticates user and returns JWT token
 func (s *Service) Login(req *model.AuthRequest) (*model.LoginResponse, error) {
+	// Validate email is not empty
+	if req.Email == "" {
+		return nil, errors.New("email is required")
+	}
+
+	// Validate password is not empty
+	if req.Password == "" {
+		return nil, errors.New("password is required")
+	}
+
 	// Get user by email
 	user, err := s.repo.GetUserByEmail(req.Email)
 	if err != nil {
@@ -168,12 +188,25 @@ func (s *Service) ValidateToken(tokenString string) (string, error) {
 		return "", errors.New("invalid token claims")
 	}
 
-	userID, ok := (*claims)["user_id"].(float64)
-	if !ok {
-		return "", errors.New("invalid user_id in token")
+	// Handle user_id as either int or float64 (JWT encodes numbers as float64)
+	userIDValue, exists := (*claims)["user_id"]
+	if !exists {
+		return "", errors.New("user_id not found in token")
 	}
 
-	return fmt.Sprintf("%d", int(userID)), nil
+	var userID int
+	switch v := userIDValue.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	case int64:
+		userID = int(v)
+	default:
+		return "", errors.New("invalid user_id type in token")
+	}
+
+	return fmt.Sprintf("%d", userID), nil
 }
 
 // isValidEmail validates email format using regex
