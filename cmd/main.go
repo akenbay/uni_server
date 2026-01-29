@@ -50,6 +50,11 @@ func main() {
 	}
 	defer db.Close(context.Background())
 
+	// Initialize database schema and seed data
+	if err := initializeDatabase(context.Background(), db, logger); err != nil {
+		logger.Fatal("Error initializing database: ", err)
+	}
+
 	repo := storage.NewRepository(db)
 	svc := service.NewService(repo)
 	hnd := handler.NewHandler(svc)
@@ -66,4 +71,44 @@ func main() {
 	if err != nil {
 		logger.Fatal("server error: ", err)
 	}
+}
+
+// initializeDatabase checks if database is initialized and runs init.sql if needed
+func initializeDatabase(ctx context.Context, db *pgx.Conn, logger *zap.SugaredLogger) error {
+	// Check if users table exists
+	var tableExists bool
+	err := db.QueryRow(ctx,
+		"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')",
+	).Scan(&tableExists)
+
+	if err != nil {
+		return err
+	}
+
+	if tableExists {
+		logger.Info("Database already initialized")
+		return nil
+	}
+
+	logger.Info("Initializing database from init.sql...")
+
+	// Read init.sql file
+	sqlBytes, err := os.ReadFile("init.sql")
+	if err != nil {
+		// Try parent directory
+		sqlBytes, err = os.ReadFile("../init.sql")
+		if err != nil {
+			return err
+		}
+	}
+
+	// Execute the entire SQL file
+	_, err = db.Exec(ctx, string(sqlBytes))
+	if err != nil {
+		logger.Warnf("Database initialization warning: %v", err)
+		// Continue anyway - some errors (like duplicate inserts) are acceptable
+	}
+
+	logger.Info("Database initialization completed")
+	return nil
 }
