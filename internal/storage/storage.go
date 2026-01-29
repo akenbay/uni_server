@@ -319,15 +319,19 @@ func (r *Repository) GetUserByID(userID string) (*model.UserResponse, error) {
 	`
 
 	rows, err := r.db.Query(context.Background(), rolesQuery, userID)
-	if err == nil {
-		defer rows.Close()
+	if err != nil {
 		user.Roles = []string{}
-		for rows.Next() {
-			var roleName string
-			if err := rows.Scan(&roleName); err == nil {
-				user.Roles = append(user.Roles, roleName)
-			}
+		return &user, nil
+	}
+	defer rows.Close()
+
+	user.Roles = []string{}
+	for rows.Next() {
+		var roleName string
+		if err := rows.Scan(&roleName); err != nil {
+			continue
 		}
+		user.Roles = append(user.Roles, roleName)
 	}
 
 	return &user, nil
