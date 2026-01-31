@@ -1,5 +1,5 @@
 # Используем официальный образ Golang
-FROM golang:1.25.5 AS builder
+FROM golang:1.25-alpine AS builder
 
 # Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
