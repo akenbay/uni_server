@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"university/internal/model"
 
 	"github.com/jackc/pgx/v5"
@@ -13,6 +14,96 @@ type Repository struct {
 
 func NewRepository(db *pgx.Conn) *Repository {
 	return &Repository{db: db}
+}
+
+func (r *Repository) InitDB() error {
+	query := `
+    CREATE TABLE IF NOT EXISTS faculties (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS groups (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(20) NOT NULL,
+        faculty_id INT REFERENCES faculties(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS roles (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(30) UNIQUE NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS user_roles (
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        role_id INT REFERENCES roles(id) ON DELETE CASCADE,
+        PRIMARY KEY (user_id, role_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS students (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        gender VARCHAR(10),
+        birth_date DATE,
+        group_id INT REFERENCES groups(id),
+        user_id INT UNIQUE REFERENCES users(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS staff (
+        id SERIAL PRIMARY KEY,
+        user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        faculty_id INT REFERENCES faculties(id),
+        position VARCHAR(50)
+    );
+
+    CREATE TABLE IF NOT EXISTS subjects (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS schedule (
+        id SERIAL PRIMARY KEY,
+        faculty_id INT REFERENCES faculties(id),
+        group_id INT REFERENCES groups(id),
+        subject_id INT REFERENCES subjects(id),
+        class_time VARCHAR(50)
+    );
+
+    CREATE TABLE IF NOT EXISTS attendance (
+        id SERIAL PRIMARY KEY,
+        student_id INT NOT NULL REFERENCES students(id),
+        subject_id INT NOT NULL REFERENCES subjects(id),
+        visit_day DATE NOT NULL,
+        visited BOOLEAN NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS grades (
+        id SERIAL PRIMARY KEY,
+        student_id INT REFERENCES students(id) ON DELETE CASCADE,
+        subject_id INT REFERENCES subjects(id) ON DELETE CASCADE,
+        grade NUMERIC(4,2),
+        graded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    `
+
+	_, err := r.db.Exec(context.Background(), query)
+	if err != nil {
+		return fmt.Errorf("failed to initialize database: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Repository) GetStudentByID(id string) (*model.StudentResponse, error) {

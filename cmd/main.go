@@ -51,6 +51,9 @@ func main() {
 	defer db.Close(context.Background())
 
 	repo := storage.NewRepository(db)
+
+	repo.InitDB()
+
 	svc := service.NewService(repo)
 	hnd := handler.NewHandler(svc)
 	srv := server.NewServer(hnd)
