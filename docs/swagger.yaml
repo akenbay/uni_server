@@ -1,5 +1,23 @@
 basePath: /
 definitions:
+  model.FacultyResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  model.GroupResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      faculty_id:
+        type: integer
+      faculty_name:
+        type: string
+    type: object
   model.AttendanceRecord:
     properties:
       id:
@@ -35,6 +53,23 @@ definitions:
         type: string
       visited:
         type: boolean
+    type: object
+  model.CreateFacultyRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  model.CreateGroupRequest:
+    properties:
+      name:
+        type: string
+      faculty_id:
+        type: integer
+    type: object
+  model.CreateSubjectRequest:
+    properties:
+      name:
+        type: string
     type: object
   model.CreateStudentRequest:
     properties:
@@ -98,6 +133,13 @@ definitions:
       id:
         type: integer
       last_name:
+        type: string
+    type: object
+  model.SubjectResponse:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
   model.UpdateStudentRequest:
@@ -214,6 +256,110 @@ paths:
     summary: Create attendance record
       tags:
       - attendance
+  /faculties:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.FacultyResponse'
+            type: array
+      summary: Get all faculties
+      tags:
+      - faculties
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Faculty data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateFacultyRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.FacultyResponse'
+      summary: Create a faculty
+      tags:
+      - faculties
+  /faculties/{id}:
+    get:
+      parameters:
+      - description: Faculty ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.FacultyResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get faculty by ID
+      tags:
+      - faculties
+  /groups:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.GroupResponse'
+            type: array
+      summary: Get all groups
+      tags:
+      - groups
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateGroupRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.GroupResponse'
+      summary: Create a group
+      tags:
+      - groups
+  /groups/{id}:
+    get:
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GroupResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get group by ID
+      tags:
+      - groups
   /student/{id}:
     get:
       parameters:
@@ -236,6 +382,58 @@ paths:
       summary: Get student by ID
       tags:
       - students
+  /subjects:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.SubjectResponse'
+            type: array
+      summary: Get all subjects
+      tags:
+      - subjects
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subject data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateSubjectRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SubjectResponse'
+      summary: Create a subject
+      tags:
+      - subjects
+  /subjects/{id}:
+    get:
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SubjectResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get subject by ID
+      tags:
+      - subjects
   /students:
     get:
       responses:

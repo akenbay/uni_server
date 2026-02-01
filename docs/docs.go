@@ -142,6 +142,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/faculties": {
+            "get": {
+                "tags": ["faculties"],
+                "summary": "Get all faculties",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/model.FacultyResponse" }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": ["application/json"],
+                "tags": ["faculties"],
+                "summary": "Create a faculty",
+                "parameters": [
+                    {
+                        "description": "Faculty data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/model.CreateFacultyRequest" }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": { "$ref": "#/definitions/model.FacultyResponse" }
+                    }
+                }
+            }
+        },
+        "/faculties/{id}": {
+            "get": {
+                "tags": ["faculties"],
+                "summary": "Get faculty by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Faculty ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/model.FacultyResponse" }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        },
+        "/groups": {
+            "get": {
+                "tags": ["groups"],
+                "summary": "Get all groups",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/model.GroupResponse" }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": ["application/json"],
+                "tags": ["groups"],
+                "summary": "Create a group",
+                "parameters": [
+                    {
+                        "description": "Group data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/model.CreateGroupRequest" }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": { "$ref": "#/definitions/model.GroupResponse" }
+                    }
+                }
+            }
+        },
+        "/groups/{id}": {
+            "get": {
+                "tags": ["groups"],
+                "summary": "Get group by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/model.GroupResponse" }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        },
         "/student/{id}": {
             "get": {
                 "tags": [
@@ -223,6 +349,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/subjects": {
+            "get": {
+                "tags": ["subjects"],
+                "summary": "Get all subjects",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/model.SubjectResponse" }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": ["application/json"],
+                "tags": ["subjects"],
+                "summary": "Create a subject",
+                "parameters": [
+                    {
+                        "description": "Subject data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/model.CreateSubjectRequest" }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": { "$ref": "#/definitions/model.SubjectResponse" }
+                    }
+                }
+            }
+        },
+        "/subjects/{id}": {
+            "get": {
+                "tags": ["subjects"],
+                "summary": "Get subject by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/model.SubjectResponse" }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        },
         "/students/{id}": {
             "delete": {
                 "tags": [
@@ -279,6 +468,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.FacultyResponse": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "integer" },
+                "name": { "type": "string" }
+            }
+        },
+        "model.GroupResponse": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "integer" },
+                "name": { "type": "string" },
+                "faculty_id": { "type": "integer" },
+                "faculty_name": { "type": "string" }
+            }
+        },
         "model.AttendanceRecord": {
             "type": "object",
             "properties": {
@@ -326,6 +531,25 @@ const docTemplate = `{
                 "visited": {
                     "type": "boolean"
                 }
+            }
+        },
+        "model.CreateFacultyRequest": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" }
+            }
+        },
+        "model.CreateGroupRequest": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "faculty_id": { "type": "integer" }
+            }
+        },
+        "model.CreateSubjectRequest": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" }
             }
         },
         "model.CreateStudentRequest": {
@@ -424,6 +648,13 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 }
+            }
+        },
+        "model.SubjectResponse": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "integer" },
+                "name": { "type": "string" }
             }
         },
         "model.UpdateStudentRequest": {

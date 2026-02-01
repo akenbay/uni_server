@@ -181,6 +181,13 @@ func (h *Handler) GetSubjectStats(c echo.Context) error {
 	return c.JSON(http.StatusOK, stats)
 }
 
+// CreateFaculty godoc
+// @Summary      Create a faculty
+// @Tags         faculties
+// @Accept       json
+// @Param        body  body  model.CreateFacultyRequest  true  "Faculty data"
+// @Success      201   {object}  model.FacultyResponse
+// @Router       /faculties [post]
 func (h *Handler) CreateFaculty(c echo.Context) error {
 	var req model.CreateFacultyRequest
 	if err := c.Bind(&req); err != nil {
@@ -193,6 +200,11 @@ func (h *Handler) CreateFaculty(c echo.Context) error {
 	return c.JSON(http.StatusCreated, faculty)
 }
 
+// GetAllFaculties godoc
+// @Summary      Get all faculties
+// @Tags         faculties
+// @Success      200  {array}  model.FacultyResponse
+// @Router       /faculties [get]
 func (h *Handler) GetAllFaculties(c echo.Context) error {
 	faculties, err := h.service.GetAllFaculties()
 	if err != nil {
@@ -201,6 +213,13 @@ func (h *Handler) GetAllFaculties(c echo.Context) error {
 	return c.JSON(http.StatusOK, faculties)
 }
 
+// GetFacultyByID godoc
+// @Summary      Get faculty by ID
+// @Tags         faculties
+// @Param        id   path      string  true  "Faculty ID"
+// @Success      200  {object}  model.FacultyResponse
+// @Failure      404  {object}  map[string]string
+// @Router       /faculties/{id} [get]
 func (h *Handler) GetFacultyByID(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -216,6 +235,13 @@ func (h *Handler) GetFacultyByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, faculty)
 }
 
+// CreateGroup godoc
+// @Summary      Create a group
+// @Tags         groups
+// @Accept       json
+// @Param        body  body  model.CreateGroupRequest  true  "Group data"
+// @Success      201   {object}  model.GroupResponse
+// @Router       /groups [post]
 func (h *Handler) CreateGroup(c echo.Context) error {
 	var req model.CreateGroupRequest
 	if err := c.Bind(&req); err != nil {
@@ -228,6 +254,11 @@ func (h *Handler) CreateGroup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, group)
 }
 
+// GetAllGroups godoc
+// @Summary      Get all groups
+// @Tags         groups
+// @Success      200  {array}  model.GroupResponse
+// @Router       /groups [get]
 func (h *Handler) GetAllGroups(c echo.Context) error {
 	groups, err := h.service.GetAllGroups()
 	if err != nil {
@@ -236,6 +267,13 @@ func (h *Handler) GetAllGroups(c echo.Context) error {
 	return c.JSON(http.StatusOK, groups)
 }
 
+// GetGroupByID godoc
+// @Summary      Get group by ID
+// @Tags         groups
+// @Param        id   path      string  true  "Group ID"
+// @Success      200  {object}  model.GroupResponse
+// @Failure      404  {object}  map[string]string
+// @Router       /groups/{id} [get]
 func (h *Handler) GetGroupByID(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -251,6 +289,13 @@ func (h *Handler) GetGroupByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, group)
 }
 
+// CreateSubject godoc
+// @Summary      Create a subject
+// @Tags         subjects
+// @Accept       json
+// @Param        body  body  model.CreateSubjectRequest  true  "Subject data"
+// @Success      201   {object}  model.SubjectResponse
+// @Router       /subjects [post]
 func (h *Handler) CreateSubject(c echo.Context) error {
 	var req model.CreateSubjectRequest
 	if err := c.Bind(&req); err != nil {
@@ -263,6 +308,11 @@ func (h *Handler) CreateSubject(c echo.Context) error {
 	return c.JSON(http.StatusCreated, subject)
 }
 
+// GetAllSubjects godoc
+// @Summary      Get all subjects
+// @Tags         subjects
+// @Success      200  {array}  model.SubjectResponse
+// @Router       /subjects [get]
 func (h *Handler) GetAllSubjects(c echo.Context) error {
 	subjects, err := h.service.GetAllSubjects()
 	if err != nil {
@@ -271,6 +321,13 @@ func (h *Handler) GetAllSubjects(c echo.Context) error {
 	return c.JSON(http.StatusOK, subjects)
 }
 
+// GetSubjectByID godoc
+// @Summary      Get subject by ID
+// @Tags         subjects
+// @Param        id   path      string  true  "Subject ID"
+// @Success      200  {object}  model.SubjectResponse
+// @Failure      404  {object}  map[string]string
+// @Router       /subjects/{id} [get]
 func (h *Handler) GetSubjectByID(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
