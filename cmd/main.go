@@ -9,7 +9,7 @@ import (
 	"university/internal/service"
 	"university/internal/storage"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -45,13 +45,13 @@ func main() {
 		logger.Fatal("DATABASE_URL environment variable is not set")
 	}
 
-	db, err := pgx.Connect(context.Background(), db_url)
+	pool, err := pgxpool.New(context.Background(), db_url)
 	if err != nil {
 		logger.Fatal("Error connecting to database: ", err)
 	}
-	defer db.Close(context.Background())
+	defer pool.Close()
 
-	repo := storage.NewRepository(db)
+	repo := storage.NewRepository(pool)
 
 	repo.InitDB()
 

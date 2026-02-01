@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"university/internal/model"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
-	db *pgx.Conn
+	pool *pgxpool.Pool
 }
 
-func NewRepository(db *pgx.Conn) *Repository {
-	return &Repository{db: db}
+func NewRepository(pool *pgxpool.Pool) *Repository {
+	return &Repository{pool: pool}
 }
 
 func (r *Repository) InitDB() error {
@@ -98,7 +98,7 @@ func (r *Repository) InitDB() error {
 
     `
 
-	_, err := r.db.Exec(context.Background(), query)
+	_, err := r.pool.Exec(context.Background(), query)
 	if err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}
@@ -108,7 +108,7 @@ func (r *Repository) InitDB() error {
 
 func (r *Repository) GetGroupIDByName(name string) (int, error) {
 	var id int
-	err := r.db.QueryRow(context.Background(), `SELECT id FROM groups WHERE name = $1`, name).Scan(&id)
+	err := r.pool.QueryRow(context.Background(), `SELECT id FROM groups WHERE name = $1`, name).Scan(&id)
 	return id, err
 }
 
@@ -130,7 +130,7 @@ func (r *Repository) CreateStudent(req *model.CreateStudentRequest) (*model.Stud
 	`
 
 	var student model.StudentResponse
-	err := r.db.QueryRow(
+	err := r.pool.QueryRow(
 		context.Background(),
 		query,
 		req.FirstName,
@@ -202,7 +202,7 @@ func (r *Repository) UpdateStudent(id string, req *model.UpdateStudentRequest) (
 	args = append(args, id)
 
 	var student model.StudentResponse
-	err := r.db.QueryRow(context.Background(), query, args...).Scan(
+	err := r.pool.QueryRow(context.Background(), query, args...).Scan(
 		&student.ID,
 		&student.FirstName,
 		&student.LastName,
@@ -218,7 +218,7 @@ func (r *Repository) UpdateStudent(id string, req *model.UpdateStudentRequest) (
 
 func (r *Repository) DeleteStudent(id string) error {
 	query := `DELETE FROM students WHERE id = $1`
-	_, err := r.db.Exec(context.Background(), query, id)
+	_, err := r.pool.Exec(context.Background(), query, id)
 	return err
 }
 
@@ -232,7 +232,7 @@ func (r *Repository) GetStudentByID(id string) (*model.StudentResponse, error) {
 
 	var student model.StudentResponse
 
-	err := r.db.QueryRow(
+	err := r.pool.QueryRow(
 		context.Background(),
 		query,
 		id,
@@ -262,7 +262,7 @@ func (r *Repository) GetAllStudents() ([]model.StudentListResponse, error) {
 	LEFT JOIN users u ON s.user_id = u.id
 	`
 
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func (r *Repository) CreateSchedule(req *model.CreateScheduleRequest) (*model.Sc
 	`
 
 	var schedule model.ScheduleResponse
-	err := r.db.QueryRow(
+	err := r.pool.QueryRow(
 		context.Background(),
 		query,
 		req.FacultyID,
@@ -322,7 +322,7 @@ func (r *Repository) UpdateSchedule(id string, req *model.UpdateScheduleRequest)
 	query := `SELECT faculty_id, group_id, subject_id, class_time FROM schedule WHERE id = $1`
 	var facultyID, groupID, subjectID int
 	var classTime string
-	err := r.db.QueryRow(context.Background(), query, id).Scan(&facultyID, &groupID, &subjectID, &classTime)
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(&facultyID, &groupID, &subjectID, &classTime)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +350,7 @@ func (r *Repository) UpdateSchedule(id string, req *model.UpdateScheduleRequest)
 	          class_time
 	`
 	var schedule model.ScheduleResponse
-	err = r.db.QueryRow(
+	err = r.pool.QueryRow(
 		context.Background(),
 		updateQuery,
 		facultyID,
@@ -373,7 +373,7 @@ func (r *Repository) UpdateSchedule(id string, req *model.UpdateScheduleRequest)
 
 func (r *Repository) DeleteSchedule(id string) error {
 	query := `DELETE FROM schedule WHERE id = $1`
-	_, err := r.db.Exec(context.Background(), query, id)
+	_, err := r.pool.Exec(context.Background(), query, id)
 	return err
 }
 
@@ -387,7 +387,7 @@ func (r *Repository) GetScheduleByID(id string) (*model.ScheduleResponse, error)
 	WHERE sc.id = $1
 	`
 	var schedule model.ScheduleResponse
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(
 		&schedule.ID,
 		&schedule.Faculty,
 		&schedule.Group,
@@ -411,7 +411,7 @@ func (r *Repository) GetAllSchedules() ([]model.ScheduleResponse, error) {
 	JOIN subjects s ON sc.subject_id = s.id
 	`
 
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -447,7 +447,7 @@ func (r *Repository) GetGroupSchedule(groupID string) ([]model.ScheduleResponse,
 	WHERE sc.group_id = $1
 	`
 
-	rows, err := r.db.Query(context.Background(), query, groupID)
+	rows, err := r.pool.Query(context.Background(), query, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -475,7 +475,7 @@ func (r *Repository) GetGroupSchedule(groupID string) ([]model.ScheduleResponse,
 func (r *Repository) CreateFaculty(req *model.CreateFacultyRequest) (*model.FacultyResponse, error) {
 	query := `INSERT INTO faculties (name) VALUES ($1) RETURNING id, name`
 	var faculty model.FacultyResponse
-	err := r.db.QueryRow(context.Background(), query, req.Name).Scan(&faculty.ID, &faculty.Name)
+	err := r.pool.QueryRow(context.Background(), query, req.Name).Scan(&faculty.ID, &faculty.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -485,7 +485,7 @@ func (r *Repository) CreateFaculty(req *model.CreateFacultyRequest) (*model.Facu
 func (r *Repository) GetFacultyByID(id string) (*model.FacultyResponse, error) {
 	query := `SELECT id, name FROM faculties WHERE id = $1`
 	var faculty model.FacultyResponse
-	err := r.db.QueryRow(context.Background(), query, id).Scan(&faculty.ID, &faculty.Name)
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(&faculty.ID, &faculty.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -494,7 +494,7 @@ func (r *Repository) GetFacultyByID(id string) (*model.FacultyResponse, error) {
 
 func (r *Repository) GetAllFaculties() ([]model.FacultyResponse, error) {
 	query := `SELECT id, name FROM faculties ORDER BY id`
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +516,7 @@ func (r *Repository) CreateGroup(req *model.CreateGroupRequest) (*model.GroupRes
 	RETURNING id, name, faculty_id, COALESCE((SELECT name FROM faculties WHERE id = $2), '')
 	`
 	var group model.GroupResponse
-	err := r.db.QueryRow(context.Background(), query, req.Name, req.FacultyID).Scan(
+	err := r.pool.QueryRow(context.Background(), query, req.Name, req.FacultyID).Scan(
 		&group.ID, &group.Name, &group.FacultyID, &group.FacultyName,
 	)
 	if err != nil {
@@ -532,7 +532,7 @@ func (r *Repository) GetGroupByID(id string) (*model.GroupResponse, error) {
 	WHERE g.id = $1
 	`
 	var group model.GroupResponse
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(
 		&group.ID, &group.Name, &group.FacultyID, &group.FacultyName,
 	)
 	if err != nil {
@@ -547,7 +547,7 @@ func (r *Repository) GetAllGroups() ([]model.GroupResponse, error) {
 	LEFT JOIN faculties f ON g.faculty_id = f.id
 	ORDER BY g.id
 	`
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -566,7 +566,7 @@ func (r *Repository) GetAllGroups() ([]model.GroupResponse, error) {
 func (r *Repository) CreateSubject(req *model.CreateSubjectRequest) (*model.SubjectResponse, error) {
 	query := `INSERT INTO subjects (name) VALUES ($1) RETURNING id, name`
 	var subject model.SubjectResponse
-	err := r.db.QueryRow(context.Background(), query, req.Name).Scan(&subject.ID, &subject.Name)
+	err := r.pool.QueryRow(context.Background(), query, req.Name).Scan(&subject.ID, &subject.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -576,7 +576,7 @@ func (r *Repository) CreateSubject(req *model.CreateSubjectRequest) (*model.Subj
 func (r *Repository) GetSubjectByID(id string) (*model.SubjectResponse, error) {
 	query := `SELECT id, name FROM subjects WHERE id = $1`
 	var subject model.SubjectResponse
-	err := r.db.QueryRow(context.Background(), query, id).Scan(&subject.ID, &subject.Name)
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(&subject.ID, &subject.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -585,7 +585,7 @@ func (r *Repository) GetSubjectByID(id string) (*model.SubjectResponse, error) {
 
 func (r *Repository) GetAllSubjects() ([]model.SubjectResponse, error) {
 	query := `SELECT id, name FROM subjects ORDER BY id`
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -609,7 +609,7 @@ func (r *Repository) CreateAttendanceRecord(req *model.CreateAttendanceRequest) 
 	`
 
 	var created model.AttendanceRecord
-	err := r.db.QueryRow(
+	err := r.pool.QueryRow(
 		context.Background(),
 		query,
 		req.StudentID,
@@ -634,7 +634,7 @@ func (r *Repository) UpdateAttendanceRecord(id string, req *model.UpdateAttendan
 	var studentID, subjectID int
 	var visitDay string
 	var visited bool
-	err := r.db.QueryRow(context.Background(), query, id).Scan(&studentID, &subjectID, &visitDay, &visited)
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(&studentID, &subjectID, &visitDay, &visited)
 	if err != nil {
 		return nil, err
 	}
@@ -658,7 +658,7 @@ func (r *Repository) UpdateAttendanceRecord(id string, req *model.UpdateAttendan
 	RETURNING id, student_id, subject_id, visit_day, visited
 	`
 	var record model.AttendanceRecord
-	err = r.db.QueryRow(
+	err = r.pool.QueryRow(
 		context.Background(),
 		updateQuery,
 		studentID,
@@ -681,14 +681,14 @@ func (r *Repository) UpdateAttendanceRecord(id string, req *model.UpdateAttendan
 
 func (r *Repository) DeleteAttendanceRecord(id string) error {
 	query := `DELETE FROM attendance WHERE id = $1`
-	_, err := r.db.Exec(context.Background(), query, id)
+	_, err := r.pool.Exec(context.Background(), query, id)
 	return err
 }
 
 func (r *Repository) GetAttendanceByID(id string) (*model.AttendanceRecord, error) {
 	query := `SELECT id, student_id, subject_id, visit_day, visited FROM attendance WHERE id = $1`
 	var record model.AttendanceRecord
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.pool.QueryRow(context.Background(), query, id).Scan(
 		&record.ID,
 		&record.StudentID,
 		&record.SubjectID,
@@ -703,7 +703,7 @@ func (r *Repository) GetAttendanceByID(id string) (*model.AttendanceRecord, erro
 
 func (r *Repository) GetAllAttendanceRecords() ([]model.AttendanceRecord, error) {
 	query := `SELECT id, student_id, subject_id, visit_day, visited FROM attendance`
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -734,7 +734,7 @@ func (r *Repository) GetAttendanceRecordsByStudentID(studentID string) ([]model.
 	LIMIT 5
 	`
 
-	rows, err := r.db.Query(context.Background(), query, studentID)
+	rows, err := r.pool.Query(context.Background(), query, studentID)
 	if err != nil {
 		return nil, err
 	}
@@ -767,7 +767,7 @@ func (r *Repository) GetAttendanceRecordsBySubjectID(subjectID string) ([]model.
 	LIMIT 5
 	`
 
-	rows, err := r.db.Query(context.Background(), query, subjectID)
+	rows, err := r.pool.Query(context.Background(), query, subjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -801,7 +801,7 @@ func (r *Repository) GetUserByEmail(email string) (*model.User, error) {
 	`
 
 	var user model.User
-	err := r.db.QueryRow(context.Background(), query, email).Scan(
+	err := r.pool.QueryRow(context.Background(), query, email).Scan(
 		&user.ID,
 		&user.Email,
 		&user.PasswordHash,
@@ -825,7 +825,7 @@ func (r *Repository) CreateUser(email, passwordHash string) (*model.User, error)
 	`
 
 	var user model.User
-	err := r.db.QueryRow(
+	err := r.pool.QueryRow(
 		context.Background(),
 		query,
 		email,
@@ -854,7 +854,7 @@ func (r *Repository) GetUserByID(userID string) (*model.UserResponse, error) {
 	`
 
 	var user model.UserResponse
-	err := r.db.QueryRow(context.Background(), query, userID).Scan(
+	err := r.pool.QueryRow(context.Background(), query, userID).Scan(
 		&user.ID,
 		&user.Email,
 		&user.IsActive,
@@ -873,7 +873,7 @@ func (r *Repository) GetUserByID(userID string) (*model.UserResponse, error) {
 	WHERE ur.user_id = $1
 	`
 
-	rows, err := r.db.Query(context.Background(), rolesQuery, userID)
+	rows, err := r.pool.Query(context.Background(), rolesQuery, userID)
 	if err != nil {
 		user.Roles = []string{}
 		return &user, nil
@@ -901,7 +901,7 @@ func (r *Repository) GetStudentsGPA() ([]model.StudentGPAResponse, error) {
 	GROUP BY s.id
 	`
 
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -929,7 +929,7 @@ func (r *Repository) GetSubjectStats() ([]model.SubjectStatsResponse, error) {
 	GROUP BY sub.name
 	`
 
-	rows, err := r.db.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
