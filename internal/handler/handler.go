@@ -37,6 +37,15 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.DELETE("/students/:id", h.DeleteStudent)
 	e.GET("/students/gpa", h.GetStudentsGPA)
 	e.GET("/subjects/stats", h.GetSubjectStats)
+	e.POST("/faculties", h.CreateFaculty)
+	e.GET("/faculties", h.GetAllFaculties)
+	e.GET("/faculties/:id", h.GetFacultyByID)
+	e.POST("/groups", h.CreateGroup)
+	e.GET("/groups", h.GetAllGroups)
+	e.GET("/groups/:id", h.GetGroupByID)
+	e.POST("/subjects", h.CreateSubject)
+	e.GET("/subjects", h.GetAllSubjects)
+	e.GET("/subjects/:id", h.GetSubjectByID)
 	e.GET("/all_class_schedule", h.GetAllSchedules)
 	e.GET("/schedule/group/:id", h.GetGroupSchedule)
 	e.GET("/schedule/:id", h.GetScheduleByID)
@@ -170,6 +179,111 @@ func (h *Handler) GetSubjectStats(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, stats)
+}
+
+func (h *Handler) CreateFaculty(c echo.Context) error {
+	var req model.CreateFacultyRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+	faculty, err := h.service.CreateFaculty(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, faculty)
+}
+
+func (h *Handler) GetAllFaculties(c echo.Context) error {
+	faculties, err := h.service.GetAllFaculties()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, faculties)
+}
+
+func (h *Handler) GetFacultyByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+	faculty, err := h.service.GetFacultyByID(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "faculty not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, faculty)
+}
+
+func (h *Handler) CreateGroup(c echo.Context) error {
+	var req model.CreateGroupRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+	group, err := h.service.CreateGroup(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, group)
+}
+
+func (h *Handler) GetAllGroups(c echo.Context) error {
+	groups, err := h.service.GetAllGroups()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, groups)
+}
+
+func (h *Handler) GetGroupByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+	group, err := h.service.GetGroupByID(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "group not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, group)
+}
+
+func (h *Handler) CreateSubject(c echo.Context) error {
+	var req model.CreateSubjectRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+	subject, err := h.service.CreateSubject(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, subject)
+}
+
+func (h *Handler) GetAllSubjects(c echo.Context) error {
+	subjects, err := h.service.GetAllSubjects()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, subjects)
+}
+
+func (h *Handler) GetSubjectByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+	subject, err := h.service.GetSubjectByID(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "subject not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, subject)
 }
 
 // GetAllSchedules godoc
