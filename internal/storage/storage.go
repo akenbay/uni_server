@@ -125,7 +125,7 @@ func (r *Repository) CreateStudent(req *model.CreateStudentRequest) (*model.Stud
 	query := `
 	INSERT INTO students (first_name, last_name, gender, birth_date, group_id)
 	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, first_name, last_name, gender, birth_date,
+	RETURNING id, first_name, last_name, gender, COALESCE(birth_date::text, ''),
 	          (SELECT name FROM groups WHERE id = $5)
 	`
 
@@ -198,7 +198,7 @@ func (r *Repository) UpdateStudent(id string, req *model.UpdateStudentRequest) (
 	}
 
 	query = query[:len(query)-2]
-	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, first_name, last_name, gender, birth_date, (SELECT name FROM groups g WHERE g.id = students.group_id)", argNum)
+	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, first_name, last_name, gender, COALESCE(birth_date::text, ''), (SELECT name FROM groups g WHERE g.id = students.group_id)", argNum)
 	args = append(args, id)
 
 	var student model.StudentResponse
@@ -224,7 +224,7 @@ func (r *Repository) DeleteStudent(id string) error {
 
 func (r *Repository) GetStudentByID(id string) (*model.StudentResponse, error) {
 	query := `
-	SELECT s.id, s.first_name, s.last_name, s.gender, s.birth_date, COALESCE(g.name, '')
+	SELECT s.id, s.first_name, s.last_name, s.gender, COALESCE(s.birth_date::text, ''), COALESCE(g.name, '')
 	FROM students s
 	LEFT JOIN groups g ON s.group_id = g.id
 	WHERE s.id = $1
