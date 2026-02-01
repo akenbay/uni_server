@@ -92,6 +92,39 @@ type AttendanceRecord struct {
 	Visited   bool   `json:"visited"`
 }
 
+// Faculty response and create request
+type FacultyResponse struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type CreateFacultyRequest struct {
+	Name string `json:"name"`
+}
+
+// Group response and create request
+type GroupResponse struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	FacultyID   int    `json:"faculty_id"`
+	FacultyName string `json:"faculty_name,omitempty"`
+}
+
+type CreateGroupRequest struct {
+	Name      string `json:"name"`
+	FacultyID int    `json:"faculty_id"`
+}
+
+// Subject response and create request
+type SubjectResponse struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type CreateSubjectRequest struct {
+	Name string `json:"name"`
+}
+
 // User represents a user account
 type User struct {
 	ID           int       `json:"id"`
