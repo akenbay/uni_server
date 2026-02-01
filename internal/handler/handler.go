@@ -32,10 +32,24 @@ func (h *Handler) Register(e *echo.Echo) {
 	// Public student/schedule routes
 	e.GET("/student/:id", h.GetStudentByID)
 	e.GET("/students", h.GetAllStudents)
+	e.POST("/students", h.CreateStudent)
+	e.PATCH("/students/:id", h.UpdateStudent)
+	e.DELETE("/students/:id", h.DeleteStudent)
 	e.GET("/students/gpa", h.GetStudentsGPA)
 	e.GET("/subjects/stats", h.GetSubjectStats)
 	e.GET("/all_class_schedule", h.GetAllSchedules)
 	e.GET("/schedule/group/:id", h.GetGroupSchedule)
+	e.GET("/schedule/:id", h.GetScheduleByID)
+	e.POST("/schedule", h.CreateSchedule)
+	e.PATCH("/schedule/:id", h.UpdateSchedule)
+	e.DELETE("/schedule/:id", h.DeleteSchedule)
+	e.GET("/attendance", h.GetAllAttendanceRecords)
+	e.GET("/attendance/student/:id", h.GetAttendanceRecordsByStudentID)
+	e.GET("/attendance/subject/:id", h.GetAttendanceRecordsBySubjectID)
+	e.GET("/attendance/:id", h.GetAttendanceByID)
+	e.POST("/attendance", h.CreateAttendanceRecord)
+	e.PATCH("/attendance/:id", h.UpdateAttendanceRecord)
+	e.DELETE("/attendance/:id", h.DeleteAttendanceRecord)
 }
 
 func (h *Handler) GetStudentByID(c echo.Context) error {
@@ -61,6 +75,53 @@ func (h *Handler) GetAllStudents(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, students)
+}
+
+func (h *Handler) CreateStudent(c echo.Context) error {
+	var req model.CreateStudentRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	student, err := h.service.CreateStudent(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, student)
+}
+
+func (h *Handler) UpdateStudent(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	var req model.UpdateStudentRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	student, err := h.service.UpdateStudent(id, &req)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "student not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, student)
+}
+
+func (h *Handler) DeleteStudent(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	err := h.service.DeleteStudent(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *Handler) GetStudentsGPA(c echo.Context) error {
@@ -100,18 +161,138 @@ func (h *Handler) GetGroupSchedule(c echo.Context) error {
 	return c.JSON(http.StatusOK, schedules)
 }
 
+func (h *Handler) GetScheduleByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	schedule, err := h.service.GetScheduleByID(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "schedule not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, schedule)
+}
+
+func (h *Handler) CreateSchedule(c echo.Context) error {
+	var req model.CreateScheduleRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	schedule, err := h.service.CreateSchedule(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, schedule)
+}
+
+func (h *Handler) UpdateSchedule(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	var req model.UpdateScheduleRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	schedule, err := h.service.UpdateSchedule(id, &req)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "schedule not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, schedule)
+}
+
+func (h *Handler) DeleteSchedule(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	err := h.service.DeleteSchedule(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *Handler) GetAllAttendanceRecords(c echo.Context) error {
+	records, err := h.service.GetAllAttendanceRecords()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, records)
+}
+
+func (h *Handler) GetAttendanceByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	record, err := h.service.GetAttendanceByID(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "attendance record not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, record)
+}
+
 func (h *Handler) CreateAttendanceRecord(c echo.Context) error {
 	var record model.AttendanceRecord
 	if err := c.Bind(&record); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
 
-	err := h.service.CreateAttendanceRecord(&record)
+	created, err := h.service.CreateAttendanceRecord(&record)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
+	return c.JSON(http.StatusCreated, created)
+}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "attendance record created successfully"})
+func (h *Handler) UpdateAttendanceRecord(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	var req model.UpdateAttendanceRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	record, err := h.service.UpdateAttendanceRecord(id, &req)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "attendance record not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, record)
+}
+
+func (h *Handler) DeleteAttendanceRecord(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+
+	err := h.service.DeleteAttendanceRecord(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.NoContent(http.StatusNoContent)
 }
 
 // Register_User handles user registration
