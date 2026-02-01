@@ -83,6 +83,42 @@ func (s *Service) GetGroupSchedule(groupID string) ([]model.ScheduleResponse, er
 	return s.repo.GetGroupSchedule(groupID)
 }
 
+func (s *Service) CreateFaculty(req *model.CreateFacultyRequest) (*model.FacultyResponse, error) {
+	return s.repo.CreateFaculty(req)
+}
+
+func (s *Service) GetFacultyByID(id string) (*model.FacultyResponse, error) {
+	return s.repo.GetFacultyByID(id)
+}
+
+func (s *Service) GetAllFaculties() ([]model.FacultyResponse, error) {
+	return s.repo.GetAllFaculties()
+}
+
+func (s *Service) CreateGroup(req *model.CreateGroupRequest) (*model.GroupResponse, error) {
+	return s.repo.CreateGroup(req)
+}
+
+func (s *Service) GetGroupByID(id string) (*model.GroupResponse, error) {
+	return s.repo.GetGroupByID(id)
+}
+
+func (s *Service) GetAllGroups() ([]model.GroupResponse, error) {
+	return s.repo.GetAllGroups()
+}
+
+func (s *Service) CreateSubject(req *model.CreateSubjectRequest) (*model.SubjectResponse, error) {
+	return s.repo.CreateSubject(req)
+}
+
+func (s *Service) GetSubjectByID(id string) (*model.SubjectResponse, error) {
+	return s.repo.GetSubjectByID(id)
+}
+
+func (s *Service) GetAllSubjects() ([]model.SubjectResponse, error) {
+	return s.repo.GetAllSubjects()
+}
+
 func (s *Service) CreateAttendanceRecord(req *model.CreateAttendanceRequest) (*model.AttendanceRecord, error) {
 	return s.repo.CreateAttendanceRecord(req)
 }
