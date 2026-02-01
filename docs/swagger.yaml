@@ -119,7 +119,7 @@ definitions:
       is_active:
         type: boolean
     type: object
-host: localhost:8080
+host: uni-server-29pn.onrender.com
 info:
   contact: {}
   description: University management API - students, schedules, attendance
@@ -294,4 +294,6 @@ paths:
       summary: Update a student
       tags:
       - students
+schemes:
+- https
 swagger: "2.0"

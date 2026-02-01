@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "University management API - students, schedules, attendance",
@@ -6,7 +9,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "uni-server-29pn.onrender.com",
     "basePath": "/",
     "paths": {
         "/all_class_schedule": {

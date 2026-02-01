@@ -18,7 +18,8 @@ import (
 // @title           University API
 // @version         1.0
 // @description     University management API - students, schedules, attendance
-// @host            localhost:8080
+// @host            uni-server-29pn.onrender.com
+// @schemes         https
 // @BasePath        /
 func main() {
 	var err error
